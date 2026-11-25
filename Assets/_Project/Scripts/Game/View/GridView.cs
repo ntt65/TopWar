@@ -43,7 +43,9 @@ namespace TopWar.Game.View
                 _grid.Changed -= Refresh;
         }
 
-        public Vector3 CellToWorld(GridPos pos) => transform.TransformPoint(CellToLocal(pos));
+        public Vector3 CellToWorld(GridPos pos) => GridToWorld(pos.X, pos.Y);
+
+        public Vector3 GridToWorld(float x, float y) => transform.TransformPoint(GridToLocal(x, y));
 
         public bool TryWorldToCell(Vector3 world, out GridPos pos)
         {
@@ -65,10 +67,12 @@ namespace TopWar.Game.View
                 view.transform.localPosition = CellToLocal(pos);
         }
 
-        private Vector3 CellToLocal(GridPos pos) => new Vector3(
-            (pos.X - (_grid.Width - 1) * 0.5f) * CellSize,
+        private Vector3 CellToLocal(GridPos pos) => GridToLocal(pos.X, pos.Y);
+
+        private Vector3 GridToLocal(float x, float y) => new Vector3(
+            (x - (_grid.Width - 1) * 0.5f) * CellSize,
             0f,
-            (pos.Y - (_grid.Height - 1) * 0.5f) * CellSize);
+            (y - (_grid.Height - 1) * 0.5f) * CellSize);
 
         private void Refresh()
         {
