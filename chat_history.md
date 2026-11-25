@@ -4,6 +4,23 @@
 
 ---
 
+## 2026-11-26 — v2 조사·계획서·상세 설계, v1 코드 삭제 (Claude)
+
+- **Chat ID:** 7709dfb5-e747-4786-98c6-5dc5046f4bd7
+- **커밋:** `ca9c0f6`(계획서·설계), 이 커밋(v1 코드 삭제·문서 갱신)
+- **요약:** Top War를 조사해 `docs/reference/top-war-research.md`에 정리했다(본편은 합성+4X, 러너는 미니게임). `docs/PLAN.md`(R1 수직 슬라이스 ~ R5 출시)와 `docs/design/`(architecture, rules, presentation, stage-1, 참고 요소 대응표)을 썼다. 사용자 요청으로 v1 코드(`Assets/_Project` 전체)와 v1 지시서를 지우고 처음부터 다시 시작한다.
+- **결정 사항:**
+  - 러너 미니게임을 메인 게임으로 "비슷하게" 만든다. 사용자는 범위 논의보다 지시 수행을 원한다.
+  - 탄은 정면 직진, 캡슐은 오른쪽 줄 → 캡슐과 적 사이 위치 선택이 핵심 조작. 무기 단계(1~5)는 무리 전체에 적용.
+  - 성능: R1은 Animator 풀링(~120명), R2에서 VAT + GPU 인스턴싱. 총알은 R1부터 인스턴싱.
+  - 에셋: Quaternius Toon Shooter Game Kit(캐릭터), Kenney Particle Pack. 숫자·팝업에 TextMeshPro(영문).
+  - 새 진입 스크립트 `GameBootstrap.cs.meta`에 옛 GUID `5d65b84e123584644b1157d5bb301f67`를 재사용해 씬 편집 없이 연결.
+- **미결정/다음 할 일:**
+  - 사용자: 계획서·설계 확인, 에셋 임포트(presentation.md 5장) 후 스크린샷, R1 이슈 생성
+  - Claude: R1-1부터 구현 (asmdef·Core·Game 폴더 새로 생성)
+
+---
+
 ## 2026-11-26 — v2 재설계 착수: 연속 좌표 러너 슈터로 전환 (Claude)
 
 - **Chat ID:** unknown

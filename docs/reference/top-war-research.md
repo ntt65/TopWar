@@ -16,7 +16,7 @@
 
 ## 2. 병종 상성 (원작)
 
-육군 > 공군 > 해군 > 육군. 우리 [CounterTable](../../Assets/_Project/Scripts/Core/Units/CounterTable.cs)과 방향이 같다.
+육군 > 공군 > 해군 > 육군. 우리 상성([rules.md](../design/rules.md) 5장)도 같은 방향으로 한다.
 
 ## 3. 우리 게임에 반영
 

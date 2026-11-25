@@ -12,7 +12,7 @@ Codex(구현 담당 에이전트)를 위한 규칙. 작업 전에 이 문서와 
 
 ## 프로젝트
 
-- 3D 합성(Merge) + 웨이브 디펜스 모바일 게임. 기획은 [README.md](README.md).
+- 3D 러너 슈터 + 군단 성장 모바일 게임. 기획은 [README.md](README.md).
 - Unity 6.3 LTS (6000.3.29f1), URP, C#, Input System, uGUI, Unity Test Framework (NUnit).
 - 대화와 보고는 한국어로 한다. 코드 식별자는 영어, 주석은 한국어.
 

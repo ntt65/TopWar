@@ -19,7 +19,7 @@ Core (순수 C#, TopWar.Core.asmdef)                Game (MonoBehaviour, TopWar.
 │   SpatialBuckets (충돌)           │   상태 배열    │  CrateView, GateView, BossView         │
 │   RunnerEvents (이벤트 큐)        ├──────────────► │ Fx/ (파편, 섬광, 링, 숫자, 팝업, 흔들림)  │
 │ Stages/ StageLayout, Stage1       │   이벤트      │ UI/  RunnerHud, PauseMenu             │
-│ Units/ UnitType, CounterTable    │              │ Config/ RunnerConfig (SO)              │
+│ Units/ UnitType, Counter         │              │ Config/ RunnerConfig (SO)              │
 └──────────────────────────────────┘              └───────────────────────────────────────┘
 ```
 

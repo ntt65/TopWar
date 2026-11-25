@@ -68,11 +68,11 @@ README 6장의 R1~R5를 이 표로 바꾼다.
 7. 에디터 Device Simulator(중급 안드로이드)에서 끊김 없이 돈다. 병사 최대 약 120명.
 8. 화면에 기본 도형(큐브·캡슐) 캐릭터가 없다.
 
-### 3.3 기존 코드 처리
+### 3.3 코드 시작점
 
-- `GameBootstrap`은 진입점으로 유지한다. 로비 Start가 디펜스 대신 러너를 시작하게 바꾼다. 디펜스 코드(`Core/Battle`, `Core/Grid`, `Game/Battle` 등)는 지우지 않고 호출만 끊는다.
-- 재사용: `PlayerProgress`, `ProgressStore`, `LobbyScreen`, `ResultScreen`, `UiFactory`, `CounterTable`, `UnitType`.
-- 씬 편집은 필요 없다 (씬에는 `GameBootstrap` 하나).
+- v1 코드(디펜스·로비·저장·테스트)는 2026-11-26에 모두 지웠다. 코드는 처음부터 새로 쓴다. 남긴 것은 Unity 기본 구성(`Assets/Scenes`, `Assets/Settings`, `Packages`, `ProjectSettings`, Input 설정)뿐이다.
+- R1에는 간단한 로비(Start 버튼·보석 표시)와 결과 화면을 새로 만든다. 영구 강화·저장은 R3.
+- 씬의 진입 오브젝트는 지워진 `GameBootstrap`의 GUID(`5d65b84e123584644b1157d5bb301f67`)를 가리킨다. 새 진입 스크립트 `GameBootstrap.cs.meta`에 이 GUID를 그대로 써서 씬 편집 없이 연결한다.
 
 ---
 
@@ -87,9 +87,9 @@ README 6장의 R1~R5를 이 표로 바꾼다.
 ## 5. R3 스테이지와 성장
 
 - [ ] 스테이지 데이터를 구간(패턴) 조합으로 생성 (스테이지 2~5)
-- [ ] 로비 영구 강화 개편: 병종 공격력, 시작 병사 수, 시작 무기 단계 (기존 `BaseHealth`, `GridSize` 대체)
+- [ ] 로비 영구 강화 개편: 병종 공격력, 시작 병사 수, 시작 무기 단계 
 - [ ] 보상: 승리 보너스 + 진행 거리 비례
-- [ ] 저장 데이터 이전 (v1 저장 키와 충돌하지 않게)
+- [ ] 진행 저장 (PlayerPrefs JSON, 새 키 `TopWar.Runner.Progress`)
 - [ ] 완료 기준: 스테이지 1~5를 강화하며 진행, 앱을 다시 켜도 유지
 
 ## 6. R4 연출·사운드·밸런스
