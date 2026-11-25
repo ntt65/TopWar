@@ -17,8 +17,10 @@
   - 기능: `feature/<짧은-설명>` (예: `feature/grid-merge`)
   - 버그 수정: `fix/<짧은-설명>`
   - 문서·설정: `chore/<짧은-설명>`
-- 작업이 끝나면: 커밋 → push → `develop` 대상 PR 생성 → 사용자 확인 후 squash 머지 → 작업 브랜치 삭제.
-- PR 머지는 사용자가 승인한 뒤에만 한다.
+- 작업이 끝나면 Claude는 커밋 → push까지만 한다.
+- **PR 생성과 머지는 사용자가 직접 한다.** Claude는 PR을 만들거나 머지하지 않는다.
+- push 후 PR을 만들 때가 되면 사용자에게 알린다: PR 생성 링크, base 브랜치(`develop` 또는 릴리스면 `main`), PR 제목·본문 초안.
+- 머지 후 다음 작업은 최신 `develop`을 pull한 뒤 새 브랜치에서 시작한다.
 
 ## CI / DevOps
 
