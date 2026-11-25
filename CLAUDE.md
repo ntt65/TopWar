@@ -2,32 +2,30 @@
 
 ## 프로젝트
 
-- 2D 합성(Merge) + 웨이브 디펜스 게임. 상세 기획은 [README.md](README.md) 참고.
-- 스택: Flutter (Dart) + Flame, Riverpod, JSON 데이터 테이블.
+- 3D 합성(Merge) + 웨이브 디펜스 모바일 게임. 상세 기획은 [README.md](README.md) 참고.
+- 스택: Unity 6.3 LTS (3D, URP), C#, Input System, ScriptableObject 데이터, Unity Test Framework.
 - 사용자와는 한국어로 대화한다.
 - 검증은 사용자와 GitHub Actions가 맡는다. 불필요한 확인·탐색 명령은 하지 않고, 작업에 꼭 필요한 CLI만 실행한다.
 - 코드 버그 디버깅은 최대 3회까지 시도한다. 3회 안에 해결되지 않으면 멈추고 원인과 시도 내용을 보고한다.
 - CLI 실패, CI 실패, 권한·승인 거부처럼 코드 밖의 문제는 재시도하지 않는다. 한 번 실패하면 바로 멈추고, 무엇이 막혔는지와 사용자가 할 일을 짧게 보고한다.
 
-## 브랜치 전략
+## 작업 방식
 
-- `main`: 릴리스용. 직접 커밋하지 않는다. `develop`이 안정되면 PR로 머지한다.
-- `develop`: 기본 개발 브랜치. 직접 커밋하지 않고 feature 브랜치의 PR만 받는다.
-- 작업 브랜치는 `develop`에서 만든다. 작업 하나에 브랜치 하나.
-  - 기능: `feature/<짧은-설명>` (예: `feature/grid-merge`)
-  - 버그 수정: `fix/<짧은-설명>`
-  - 문서·설정: `chore/<짧은-설명>`
-- 작업이 끝나면 Claude는 커밋 → push까지만 한다.
-- **PR 생성과 머지는 사용자가 직접 한다.** Claude는 PR을 만들거나 머지하지 않는다.
-- push 후 PR을 만들 때가 되면 사용자에게 알린다: PR 생성 링크, base 브랜치(`develop` 또는 릴리스면 `main`), PR 제목·본문 초안.
-- 작업은 GitHub 이슈 단위로 한다. 브랜치 이름에 이슈 번호를 넣고(예: `feature/4-grid-merge`), PR 본문 초안에는 반드시 `Closes #<이슈 번호>`를 넣는다.
-- 머지 후 다음 작업은 최신 `develop`을 pull한 뒤 새 브랜치에서 시작한다.
+개발 환경, 저장소 구조, 브랜치·이슈·PR 흐름, CI는 아래 문서를 따른다.
 
-## CI / DevOps
+@WORKFLOW.md
 
-- `.github/workflows/ci.yml`: `develop`·`main` 대상 PR/push에서 `dart format` 검사 → `flutter analyze` → `flutter test` 실행. `pubspec.yaml`이 없으면 건너뛴다.
-- `.github/dependabot.yml`: GitHub Actions·pub 의존성 업데이트 PR을 매월 `develop`으로 연다.
-- `.gitattributes`: 줄바꿈을 LF로 통일한다. 커밋 전 `dart format .`을 실행한다.
+Claude 전용 규칙:
+
+- **Claude는 계획과 리뷰를 맡고, 구현은 Codex가 한다.** Claude는 기능 코드를 직접 쓰지 않고 `docs/tasks/`에 작업 지시서를 쓴다 ([docs/tasks/TEMPLATE.md](docs/tasks/TEMPLATE.md) 형식). Codex 규칙은 [AGENTS.md](AGENTS.md).
+  - 지시서는 Codex가 질문 없이 구현할 수 있게 쓴다: 변경할 파일, 클래스·메서드 시그니처, 동작, 테스트할 항목, 하지 말 것.
+  - 큰 이슈는 Codex가 한 번에 끝낼 수 있는 크기로 지시서를 나눈다.
+  - 리뷰할 때는 AGENTS.md 규칙 위반(Core의 UnityEngine 참조, 테스트 누락, 범위 밖 변경)과 버그를 본다. 수정이 필요하면 지시서에 "수정 요청" 섹션을 추가한다.
+  - 문서, 설정, 지시서는 Claude가 직접 커밋·push한다.
+- Claude는 커밋 → push까지만 한다. **PR 생성과 머지는 사용자가 직접 한다.**
+- push 후 PR을 만들 때가 되면 사용자에게 알린다: PR 생성 링크, base 브랜치(`develop`, 릴리스면 `main`), PR 제목·본문 초안. 본문에는 반드시 `Closes #<이슈 번호>`를 넣는다.
+- 사용자가 복사해서 쓸 내용(PR·이슈 제목과 본문, 명령어 등)은 항목마다 **별도의 코드 블록**으로 준다. 제목도 코드 블록으로 줘서 복사 버튼이 생기게 한다.
+- 작업 방식이 바뀌면 CLAUDE.md가 아니라 WORKFLOW.md를 고친다.
 
 ## 대화 기록 규칙
 
