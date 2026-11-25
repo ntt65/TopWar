@@ -1,9 +1,11 @@
 using TopWar.Core.Battle;
 using TopWar.Core.Economy;
 using TopWar.Core.Grid;
+using TopWar.Core.Progression;
 using TopWar.Game.Battle;
 using TopWar.Game.Config;
 using TopWar.Game.Controls;
+using TopWar.Game.Save;
 using TopWar.Game.UI;
 using TopWar.Game.View;
 using UnityEngine;
@@ -11,14 +13,17 @@ using UnityEngine;
 namespace TopWar.Game
 {
     /// <summary>
-    /// 게임 진입점. 씬의 빈 GameObject에 이 컴포넌트 하나만 붙이면
-    /// 그리드, 카메라, 드래그 입력, HUD를 모두 코드로 만든다.
+    /// 진행 상태를 불러오고 로비, 전투, 결과 화면을 연결한다.
     /// </summary>
     public sealed class GameBootstrap : MonoBehaviour
     {
         [Tooltip("비워 두면 기본값으로 실행한다.")]
         [SerializeField] private BalanceConfig balance;
 
+        private PlayerProgress _progress;
+        private Camera _camera;
+        private LobbyScreen _lobby;
+        private int _stage;
         private GridView _gridView;
         private DragController _dragController;
         private CanvasGroup _hudInput;
@@ -31,31 +36,51 @@ namespace TopWar.Game
 
         private void Awake()
         {
+            _progress = ProgressStore.Load();
+            _progress.Changed += SaveProgress;
+            UiFactory.EnsureEventSystem();
+            _camera = GetOrCreateMainCamera();
+
+            _lobby = new GameObject("Lobby").AddComponent<LobbyScreen>();
+            _lobby.Init(_progress, StartStage);
+        }
+
+        private void StartStage(int stage)
+        {
+            if (_lobby == null) return;
+
+            _progress.Changed -= SaveProgress;
+            _lobby.gameObject.SetActive(false);
+            Destroy(_lobby.gameObject);
+            _lobby = null;
+            _stage = stage;
+
             var config = balance != null ? balance : ScriptableObject.CreateInstance<BalanceConfig>();
 
-            Grid = new GridModel(config.GridWidth, config.GridHeight);
+            var gridSize = _progress.GetGridSize();
+            Grid = new GridModel(gridSize, gridSize);
             Wallet = new Wallet(config.StartingGold);
             Summon = new SummonService(Grid, Wallet, config.SummonBaseCost, config.SummonCostStep);
 
             _gridView = new GameObject("Grid").AddComponent<GridView>();
             _gridView.Init(Grid);
 
-            var cam = GetOrCreateMainCamera();
-            var rig = cam.GetComponent<CameraRig>();
-            if (rig == null) rig = cam.gameObject.AddComponent<CameraRig>();
+            var rig = _camera.GetComponent<CameraRig>();
+            if (rig == null) rig = _camera.gameObject.AddComponent<CameraRig>();
             rig.Init(_gridView);
 
             _dragController = gameObject.AddComponent<DragController>();
-            _dragController.Init(cam, Grid, _gridView);
+            _dragController.Init(_camera, Grid, _gridView);
 
             var hud = new GameObject("HUD");
             _hudInput = hud.AddComponent<CanvasGroup>();
             hud.AddComponent<Hud>().Init(Wallet, Summon);
 
-            var battleSettings = new BattleSettings { UnitBaseAttack = config.BaseAttack };
+            var battleSettings = StageRules.CreateSettings(stage, _progress, config.BaseAttack);
             BaseHealth = new BaseHealth(battleSettings.BaseMaxHealth);
             Battle = new BattleSimulation(Grid, Wallet, BaseHealth, new WaveGenerator(battleSettings), battleSettings);
-            Battle.GameOver += DisableGameplayInput;
+            Battle.GameOver += OnGameOver;
+            Battle.StageCleared += OnStageCleared;
 
             new GameObject("Battlefield").AddComponent<BattlefieldView>().Init(_gridView, Battle, battleSettings);
             new GameObject("Battle Runner").AddComponent<BattleRunner>().Init(Battle, Grid, _gridView);
@@ -64,8 +89,43 @@ namespace TopWar.Game
 
         private void OnDestroy()
         {
+            if (_progress != null)
+                _progress.Changed -= SaveProgress;
             if (Battle != null)
-                Battle.GameOver -= DisableGameplayInput;
+            {
+                Battle.GameOver -= OnGameOver;
+                Battle.StageCleared -= OnStageCleared;
+            }
+        }
+
+        private void SaveProgress()
+        {
+            ProgressStore.Save(_progress);
+        }
+
+        private void OnGameOver()
+        {
+            FinishStage(false);
+        }
+
+        private void OnStageCleared()
+        {
+            FinishStage(true);
+        }
+
+        private void FinishStage(bool victory)
+        {
+            DisableGameplayInput();
+
+            var clearedWaves = Battle.ClearedWaves;
+            var gems = StageRules.GemReward(_stage, clearedWaves, victory);
+            _progress.AddGems(gems);
+            if (victory)
+                _progress.RecordStageCleared(_stage);
+            SaveProgress();
+
+            new GameObject("Result").AddComponent<ResultScreen>()
+                .Init(_stage, victory, clearedWaves, StageRules.WavesPerStage, gems);
         }
 
         private void DisableGameplayInput()

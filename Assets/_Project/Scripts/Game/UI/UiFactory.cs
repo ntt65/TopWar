@@ -1,5 +1,7 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 namespace TopWar.Game.UI
@@ -7,6 +9,13 @@ namespace TopWar.Game.UI
     internal static class UiFactory
     {
         private static Font _font;
+
+        internal static void EnsureEventSystem()
+        {
+            if (EventSystem.current != null) return;
+            var go = new GameObject("EventSystem", typeof(EventSystem));
+            go.AddComponent<InputSystemUIInputModule>().AssignDefaultActions();
+        }
 
         internal static Canvas CreateCanvas(Transform parent)
         {
