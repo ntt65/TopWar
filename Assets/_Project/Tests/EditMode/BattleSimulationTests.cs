@@ -118,6 +118,44 @@ namespace TopWar.Core.Battle
         }
 
         [Test]
+        public void Attack_IncludesRangeBoundaryAndExcludesDiagonalBeyondRange()
+        {
+            _settings.SpawnDistance = 2f;
+            _settings.EnemyCountBase = 2;
+            _settings.SpawnIntervalStart = 0f;
+            _settings.SpawnIntervalMin = 0f;
+            _grid.TryPlace(new GridPos(0, 0), new UnitData(UnitType.Army, 1));
+            var battle = StartBattle((UnitType.Army, 1), (UnitType.Army, 0));
+            Enemy target = null;
+            battle.UnitFired += (_, enemy, _) => target = enemy;
+
+            battle.Tick(0f);
+
+            Assert.That(target, Is.SameAs(battle.Enemies[1]));
+            Assert.That(battle.Enemies[0].Hp, Is.EqualTo(30f));
+        }
+
+        [Test]
+        public void Attack_OrdersUnitsByRowThenColumn()
+        {
+            _settings.UnitBaseAttack = 1f;
+            var unit = new UnitData(UnitType.Army, 1);
+            var upperLeft = new GridPos(0, 1);
+            var lowerRight = new GridPos(1, 0);
+            var lowerLeft = new GridPos(0, 0);
+            _grid.TryPlace(upperLeft, unit);
+            _grid.TryPlace(lowerRight, unit);
+            _grid.TryPlace(lowerLeft, unit);
+            var battle = StartBattle((UnitType.Navy, 0));
+            var firedFrom = new List<GridPos>();
+            battle.UnitFired += (pos, _, _) => firedFrom.Add(pos);
+
+            battle.Tick(0f);
+
+            Assert.That(firedFrom, Is.EqualTo(new[] { lowerLeft, lowerRight, upperLeft }));
+        }
+
+        [Test]
         public void Attack_PicksLowestYEvenWhenItSpawnsLater()
         {
             _settings.EnemyCountBase = 2;
@@ -169,6 +207,28 @@ namespace TopWar.Core.Battle
             Assert.That(battle.Enemies[0].Hp, Is.EqualTo(30f - 4.5f * 0.85f).Within(0.0001f));
             Assert.That(battle.Enemies[1].Hp, Is.EqualTo(45f - 4.5f * 1.25f).Within(0.0001f));
             Assert.That(battle.Enemies[2].Hp, Is.EqualTo(45f));
+        }
+
+        [Test]
+        public void SplashKill_AwardsEachRewardAndLeavesEnemiesOutsideRadius()
+        {
+            _settings.EnemyCountBase = 3;
+            _settings.SpawnIntervalStart = 0f;
+            _settings.SpawnIntervalMin = 0f;
+            _settings.UnitBaseAttack = 100f;
+            _grid.TryPlace(new GridPos(0, 0), new UnitData(UnitType.AirForce, 1));
+            var battle = StartBattle((UnitType.Army, 0), (UnitType.Navy, 0), (UnitType.Navy, 1));
+            var killed = new List<int>();
+            battle.EnemyKilled += enemy => killed.Add(enemy.Id);
+
+            battle.Tick(0f);
+
+            Assert.That(killed.Count, Is.EqualTo(2));
+            Assert.That(killed[0], Is.LessThan(killed[1]));
+            Assert.That(_wallet.Gold, Is.EqualTo(12));
+            Assert.That(battle.Enemies.Count, Is.EqualTo(1));
+            Assert.That(battle.Enemies[0].Lane, Is.EqualTo(1));
+            Assert.That(battle.State, Is.EqualTo(BattleState.InWave));
         }
 
         [Test]
@@ -335,10 +395,22 @@ namespace TopWar.Core.Battle
             Assert.That(battle.Enemies[0].Y, Is.EqualTo(battle.SpawnY));
         }
 
-        [Test]
-        public void Tick_RejectsNegativeDeltaTime()
+        [TestCase(-1f)]
+        [TestCase(float.NaN)]
+        [TestCase(float.NegativeInfinity)]
+        [TestCase(float.PositiveInfinity)]
+        public void Tick_RejectsInvalidDeltaTimeWithoutChangingState(float deltaTime)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => CreateBattle().Tick(-1f));
+            var battle = StartBattle();
+            battle.Tick(0f);
+            var enemy = battle.Enemies[0];
+            float initialY = enemy.Y;
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => battle.Tick(deltaTime));
+
+            Assert.That(battle.State, Is.EqualTo(BattleState.InWave));
+            Assert.That(enemy.Y, Is.EqualTo(initialY));
+            Assert.That(_health.Current, Is.EqualTo(100));
         }
 
         private BattleSimulation CreateBattle(Random random = null) =>

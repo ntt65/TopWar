@@ -61,7 +61,8 @@ namespace TopWar.Core.Battle
 
         public void Tick(float deltaTime)
         {
-            if (deltaTime < 0f) throw new ArgumentOutOfRangeException(nameof(deltaTime));
+            if (deltaTime < 0f || float.IsNaN(deltaTime) || float.IsInfinity(deltaTime))
+                throw new ArgumentOutOfRangeException(nameof(deltaTime));
 
             // 이벤트에서 Tick을 호출해도 진행 중인 처리 순서와 재사용 목록을 유지한다.
             if (State == BattleState.GameOver || _isTicking) return;
