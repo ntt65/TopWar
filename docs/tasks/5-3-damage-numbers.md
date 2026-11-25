@@ -45,6 +45,12 @@
   - ARMY → `Strong vs AIR`, AIR → `Strong vs NAVY`, NAVY → `Strong vs ARMY`.
 - 이긴 상대는 `CounterTable.Beats`로 계산한다 (하드코딩 금지).
 
+### 4. 비활성 버튼 구분 (로비 업그레이드 버튼)
+
+- 지금은 보석이 부족해 `interactable = false`인 버튼이 살 수 있는 버튼과 같은 색으로 보인다.
+- `UiFactory.CreateButton`이 만드는 버튼의 `Button.colors.disabledColor`를 확실히 어둡게(예: 알파 0.35) 설정하고, 비활성일 때 버튼 라벨 텍스트도 회색으로 바꾼다. 로비의 갱신 코드에서 라벨 색을 `interactable`에 맞춰 바꾼다.
+- `MAX`인 버튼도 같은 비활성 스타일.
+
 ## 하지 말 것
 
 - Core 수정 금지.
@@ -55,6 +61,7 @@
 - [ ] 유닛이 쏠 때 적 머리 위에 숫자가 떠올랐다 사라짐
 - [ ] 상성 유리 노란색·크게, 불리 회색·작게
 - [ ] 소환 버튼 아래 줄에 `Strong vs ...`
+- [ ] 로비에서 보석이 부족하거나 MAX인 업그레이드 버튼이 어둡게 보임
 - [ ] EditMode 테스트 전부 통과
 
 ## 참고
