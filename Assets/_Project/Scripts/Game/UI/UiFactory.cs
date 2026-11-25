@@ -72,7 +72,8 @@ namespace TopWar.Game.UI
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
             var colors = button.colors;
-            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.35f);
+            // 배경을 불투명하게 두고 어둡게만 해서 비활성일 때도 버튼 모양이 보이게 한다.
+            colors.disabledColor = new Color(0.65f, 0.65f, 0.65f, 1f);
             button.colors = colors;
             button.onClick.AddListener(onClick);
 

@@ -24,6 +24,7 @@ namespace TopWar.Game.UI
         public const string NavyAttack = "Navy ATK";
         public const string BaseHealth = "Base HP";
         public const string GridSize = "Grid Size";
+        public const string DebugGems = "+{0} Gems";
         public const string Level = "Lv.{0}";
         public const string AttackBonus = "+{0}%";
         public const string HealthBonus = "HP {0}";

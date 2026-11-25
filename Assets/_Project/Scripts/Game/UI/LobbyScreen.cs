@@ -10,6 +10,8 @@ namespace TopWar.Game.UI
 {
     public sealed class LobbyScreen : MonoBehaviour
     {
+        private const int DebugGemsAmount = 50;
+
         private PlayerProgress _progress;
         private Text _gemsText;
         private Text _startLabel;
@@ -36,6 +38,13 @@ namespace TopWar.Game.UI
             var reset = UiFactory.CreateButton(root, "Reset", Texts.Reset, new Color(0.24f, 0.3f, 0.37f),
                 Vector2.one, Vector2.one, new Vector2(-180f, -108f), new Vector2(-32f, -36f), ResetProgress);
             reset.GetComponentInChildren<Text>().fontSize = 32;
+
+            // 개발용: 업그레이드 확인을 빠르게 하기 위한 보석 추가 버튼.
+            var debugGems = UiFactory.CreateButton(root, "DebugGems", string.Format(Texts.DebugGems, DebugGemsAmount),
+                new Color(0.24f, 0.3f, 0.37f),
+                Vector2.one, Vector2.one, new Vector2(-400f, -108f), new Vector2(-200f, -36f),
+                () => _progress.AddGems(DebugGemsAmount));
+            debugGems.GetComponentInChildren<Text>().fontSize = 32;
 
             var upgrades = UiFactory.CreateRect(root, "Upgrades", new Vector2(0.05f, 0.24f),
                 new Vector2(0.95f, 0.64f), Vector2.zero, Vector2.zero);
