@@ -1,14 +1,15 @@
 # TopWar Defense (가제)
 
-**그리드 기반 유닛 합성(Merge)** 과 **웨이브 디펜스(Wave Defense)** 를 결합한 2D 전략 디펜스 게임 프로젝트입니다.
+**그리드 기반 유닛 합성(Merge)** 과 **웨이브 디펜스(Wave Defense)** 를 결합한 3D 전략 디펜스 게임 프로젝트입니다.
 
 ---
 
 ## 1. 게임 개요 (Game Overview)
 
-* **장르:** 2D 합성(Merge) + 웨이브 디펜스(Wave Defense)
-* **플랫폼:** Mobile (Android / iOS) & Web (Flutter + Flame Engine)
-* **화면:** 세로(Portrait) 모드
+* **장르:** 3D 합성(Merge) + 웨이브 디펜스(Wave Defense)
+* **플랫폼:** Mobile (Android / iOS)
+* **화면:** 세로(Portrait) 모드, 위에서 비스듬히 내려다보는 고정 쿼터뷰 카메라
+* **그래픽:** 3D 로우폴리 유닛이 전장에서 실제로 움직이고, 사격하고, 합성 연출을 보여준다.
 * **핵심 재미 요소:**
   1. 제한된 그리드 공간 내에서 하위 유닛을 합성하여 상위 병기로 진화시키는 쾌감
   2. 병종 간 상성(육군·해군·공군)을 고려한 전략적 진형 배치
@@ -123,16 +124,26 @@
 
 ## 5. 기술 스택 (Tech Stack)
 
-* **Framework:** Flutter (Dart)
-* **Game Engine:** Flame (2D Game Loop, Sprite Animation, Hitbox Collision)
-* **State Management:** Riverpod (재화, 그리드 상태, 업그레이드 UI 동기화)
-* **Data Format:** JSON (유닛 스탯 테이블 및 웨이브 데이터 관리)
+* **Engine:** Unity 6 (LTS), 3D 프로젝트
+* **Language:** C#
+* **Rendering:** URP (Universal Render Pipeline), 모바일 최적화
+* **Input:** Input System 패키지 (터치 드래그 → 레이캐스트로 그리드 칸 선택)
+* **Data:** ScriptableObject (유닛 스탯 테이블, 웨이브 데이터, 밸런스 값)
+* **Test:** Unity Test Framework (EditMode: 합성·상성·경제 로직, PlayMode: 전투 흐름)
+* **CI:** GitHub Actions + GameCI (`game-ci/unity-test-runner`)
+* **아트:** Phase 1~3은 기본 도형(큐브·캡슐)으로 프로토타입, Phase 4에서 로우폴리 3D 에셋으로 교체
+* **대용량 파일:** Git LFS (모델, 텍스처, 오디오)
+
+### 게임 로직 구조 원칙
+
+* 합성·상성·경제·웨이브 같은 **게임 규칙은 MonoBehaviour와 분리된 순수 C# 클래스**로 작성해 EditMode 테스트로 검증한다.
+* MonoBehaviour는 화면 표시, 입력, 연출만 담당하고 규칙 클래스를 호출한다.
 
 ---
 
 ## 6. 개발 마일스톤 (Roadmap)
 
-* [ ] **Phase 1:** $5 \times 5$ 그리드 생성 및 드래그 앤 드롭 합성 프로토타입 구현 (#3)
+* [ ] **Phase 1:** Unity 프로젝트 생성, 3D $5 \times 5$ 그리드 및 터치 드래그 합성 프로토타입 구현 (#3)
 * [ ] **Phase 2:** 적 웨이브 스폰, 레인 이동, 자동 사격 및 투사체 충돌 로직 구현 (#4)
 * [ ] **Phase 3:** 병종 상성 연산, 골드·보석 경제, 소환/업그레이드 HUD 연동 (#5)
-* [ ] **Phase 4:** 합성 파티클 이펙트, 사운드 적용 및 밸런싱 튜닝 (#6)
+* [ ] **Phase 4:** 로우폴리 3D 에셋 교체, 합성·전투 파티클 이펙트, 사운드 및 밸런싱 튜닝 (#6)

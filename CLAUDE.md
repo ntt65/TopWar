@@ -2,8 +2,11 @@
 
 ## 프로젝트
 
-- 2D 합성(Merge) + 웨이브 디펜스 게임. 상세 기획은 [README.md](README.md) 참고.
-- 스택: Flutter (Dart) + Flame, Riverpod, JSON 데이터 테이블.
+- 3D 합성(Merge) + 웨이브 디펜스 모바일 게임. 상세 기획은 [README.md](README.md) 참고.
+- 스택: Unity 6 LTS (3D, URP), C#, Input System, ScriptableObject 데이터, Unity Test Framework.
+- Unity 프로젝트는 저장소 루트에 있다 (`Assets/`, `Packages/`, `ProjectSettings/`).
+- 게임 규칙(합성·상성·경제·웨이브)은 MonoBehaviour와 분리된 순수 C# 클래스로 작성하고 EditMode 테스트를 붙인다.
+- Claude는 C# 스크립트와 테스트를 작성한다. 씬·프리팹 구성처럼 Unity 에디터에서 해야 하는 작업은 사용자에게 단계별로 안내한다.
 - 사용자와는 한국어로 대화한다.
 - 검증은 사용자와 GitHub Actions가 맡는다. 불필요한 확인·탐색 명령은 하지 않고, 작업에 꼭 필요한 CLI만 실행한다.
 - 코드 버그 디버깅은 최대 3회까지 시도한다. 3회 안에 해결되지 않으면 멈추고 원인과 시도 내용을 보고한다.
@@ -26,9 +29,10 @@
 
 ## CI / DevOps
 
-- `.github/workflows/ci.yml`: `develop`·`main` 대상 PR/push에서 `dart format` 검사 → `flutter analyze` → `flutter test` 실행. `pubspec.yaml`이 없으면 건너뛴다.
-- `.github/dependabot.yml`: GitHub Actions·pub 의존성 업데이트 PR을 매월 `develop`으로 연다.
-- `.gitattributes`: 줄바꿈을 LF로 통일한다. 커밋 전 `dart format .`을 실행한다.
+- `.github/workflows/ci.yml`: `develop`·`main` 대상 PR/push에서 GameCI로 EditMode·PlayMode 테스트를 실행한다. Unity 프로젝트나 `UNITY_LICENSE` 시크릿이 없으면 건너뛴다.
+- GitHub 시크릿: `UNITY_LICENSE`, `UNITY_EMAIL`, `UNITY_PASSWORD` (사용자가 설정).
+- `.github/dependabot.yml`: GitHub Actions 업데이트 PR을 매월 `develop`으로 연다.
+- `.gitattributes`: 텍스트는 LF, 모델·텍스처·오디오·폰트는 Git LFS.
 
 ## 대화 기록 규칙
 

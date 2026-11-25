@@ -4,10 +4,28 @@
 
 ---
 
+## 2026-11-25 — 기술 스택을 Unity 3D로 전환
+
+- **Chat ID:** 640346c0-dcd0-4262-bc6a-86e241f914d6
+- **커밋:** `chore/unity-stack` 브랜치 (PR → `develop`)
+- **요약:** 실제로 움직이는 3D 게임을 목표로 Flutter + Flame에서 Unity 6 LTS(3D, URP)로 전환했다. README, CLAUDE.md, CI(GameCI), .gitignore, .gitattributes(LFS), Dependabot을 Unity 기준으로 바꿨다.
+- **결정 사항:**
+  - 엔진 Unity 6 LTS, C#, URP, Input System, ScriptableObject 데이터. 플랫폼은 Android/iOS (웹 제외).
+  - 세로 화면 + 고정 쿼터뷰 카메라. Phase 1~3은 기본 도형으로, Phase 4에서 로우폴리 에셋으로 교체.
+  - 게임 규칙은 순수 C# 클래스로 분리해 EditMode 테스트. Claude는 스크립트를, 사용자는 에디터 작업을 맡는다.
+  - 교훈: GitHub에서 PR base 기본값이 `main`이라 #8이 `main`으로 머지됐다. PR을 만들 때 base를 꼭 확인하고, 기본 브랜치를 `develop`으로 바꾼다.
+- **미결정/다음 할 일:**
+  - GitHub 기본 브랜치를 `develop`으로 변경
+  - Unity 프로젝트 생성(사용자), GitHub에 Unity 라이선스 시크릿 등록
+  - 이슈 #3, #5 본문을 Unity 기준으로 수정
+  - #3 Phase 1 착수
+
+---
+
 ## 2026-11-25 — #1 README 정리 / #2 게임 설계 공백 결정
 
 - **Chat ID:** 640346c0-dcd0-4262-bc6a-86e241f914d6
-- **커밋:** `docs/1-readme-design` 브랜치 (PR → `develop`, Closes #1 #2)
+- **커밋:** `680ad92` (PR #8, `main`으로 머지됨)
 - **요약:** 설계 공백 8개 항목을 결정하고 README에 반영했다. README 하단의 잘못 복사된 내용과 다른 게임명 직접 언급을 제거했다.
 - **결정 사항:**
   - 전장: 적은 화면 위에서 아래 기지로 세로 레인(열마다 1개)을 따라 진격. 세로 화면.

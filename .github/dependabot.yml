@@ -5,9 +5,3 @@ updates:
     target-branch: develop
     schedule:
       interval: monthly
-
-  - package-ecosystem: pub
-    directory: /
-    target-branch: develop
-    schedule:
-      interval: monthly
