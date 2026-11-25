@@ -141,63 +141,9 @@
 
 ---
 
-## 6. 개발 환경 (Development Setup)
+## 6. 개발 환경 및 작업 방식
 
-### 필요한 도구
-
-* **Unity Hub** + **Unity 6.3 LTS (6000.3.29f1)**
-  * 모듈: Android Build Support, OpenJDK, Android SDK & NDK Tools
-  * iOS 빌드는 Mac + iOS Build Support 필요
-* **코드 에디터:** VS Code + Unity 확장 (`VisualStudioToolsForUnity.vstuc`)
-  * Unity → Edit → Preferences → External Tools → External Script Editor를 Visual Studio Code로 설정
-* **Git LFS:** 모델·텍스처·오디오 등 대용량 파일 관리 (Git for Windows에 포함)
-
-### 저장소 구조
-
-```text
-TopWar/
-├── Assets/
-│   └── _Project/            ← 이 게임의 모든 리소스와 코드
-│       ├── Scripts/
-│       │   └── Core/        ← 게임 규칙 (순수 C#, UnityEngine 미사용)
-│       └── Tests/
-│           └── EditMode/    ← 규칙 단위 테스트
-├── Packages/                ← 패키지 목록 (manifest.json)
-├── ProjectSettings/         ← 프로젝트 설정, Unity 버전
-├── .github/                 ← CI 워크플로우, PR 템플릿, Dependabot
-├── CLAUDE.md                ← Claude 작업 규칙
-└── chat_history.md          ← 작업 기록
-```
-
-### Git에 올리는 것 / 올리지 않는 것
-
-| 구분 | 폴더·파일 | 이유 |
-| --- | --- | --- |
-| **커밋** | `Assets/`, `Packages/`, `ProjectSettings/` | 프로젝트 원본 |
-| **커밋** | 모든 `.meta` 파일 | 에셋 GUID와 임포트 설정. 빠지면 참조가 깨짐 |
-| 제외 | `Library/` | 임포트 캐시. 가장 크고 Unity가 자동 재생성 |
-| 제외 | `Temp/`, `Obj/`, `Logs/` | 임시 파일, 컴파일 중간물, 로그 |
-| 제외 | `UserSettings/` | 개인 에디터 레이아웃·설정 |
-| 제외 | `Build/`, `Builds/`, `*.apk`, `*.aab` | 빌드 결과물 |
-| 제외 | `.vs/`, `*.sln`, `*.csproj` | IDE가 자동 생성 |
-| 제외 | `*.keystore`, `*.jks`, `.env` | 서명 키, 비밀 정보 |
-
-Unreal과 비교하면 `Library/`는 `DerivedDataCache/`와 `Intermediate/`, `Logs/`와 `UserSettings/`는 `Saved/`에 해당한다.
-
-### Git LFS 대상
-
-`.fbx`, `.obj`, `.blend`, `.png`, `.jpg`, `.tga`, `.psd`, `.exr`, `.hdr`, `.wav`, `.mp3`, `.ogg`, `.ttf`, `.otf`, `.mp4` ([.gitattributes](.gitattributes) 참고)
-
-### 브랜치 및 작업 흐름
-
-* `main`: 릴리스용 / `develop`: 기본 개발 브랜치
-* 이슈마다 `develop`에서 브랜치 생성: `feature/<이슈번호>-<설명>`, `fix/...`, `chore/...`
-* 커밋 → push → `develop` 대상 PR (본문에 `Closes #이슈번호`) → CI 통과 확인 → 머지
-
-### CI
-
-* PR과 push 때 GitHub Actions + GameCI로 EditMode·PlayMode 테스트를 실행한다.
-* 저장소 Secrets에 `UNITY_LICENSE`(`C:\ProgramData\Unity\Unity_lic.ulf` 내용), `UNITY_EMAIL`, `UNITY_PASSWORD`가 있어야 한다. 없으면 테스트를 건너뛴다.
+개발 환경, 저장소 규칙, 브랜치·이슈·PR 흐름, CI는 [WORKFLOW.md](WORKFLOW.md)에 정리되어 있다.
 
 ---
 
