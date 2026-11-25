@@ -1,3 +1,7 @@
+using System;
+using TopWar.Core.Runner;
+using TopWar.Game.View;
+
 namespace TopWar.Game.UI
 {
     public static class Texts
@@ -15,6 +19,12 @@ namespace TopWar.Game.UI
         public const string NextWave = "Next wave in {0}";
         public const string Base = "Base {0}/{1}";
         public const string Boss = "BOSS {0}s";
+        public const string GateAdd = "+{0}";
+        public const string GateMultiply = "x{0}";
+        public const string GateSubtract = "-{0}";
+        public const string GateMerge = "MERGE";
+        public const string SquadCount = "{0} x{1}";
+        public const string CrateReward = "+{0}";
 
         public const string LobbyTitle = "TopWar Defense";
         public const string Gems = "Gems {0}";
@@ -25,6 +35,7 @@ namespace TopWar.Game.UI
         public const string BaseHealth = "Base HP";
         public const string GridSize = "Grid Size";
         public const string DebugGems = "+{0} Gems";
+        public const string DevRunner = "Runner";
         public const string Level = "Lv.{0}";
         public const string AttackBonus = "+{0}%";
         public const string HealthBonus = "HP {0}";
@@ -38,5 +49,15 @@ namespace TopWar.Game.UI
         public const string WavesCleared = "Waves {0}/{1}";
         public const string GemsEarned = "Gems +{0}";
         public const string Lobby = "Lobby";
+
+        internal static string FormatGate(Gate gate) => gate.Kind switch
+        {
+            GateKind.Add => string.Format(GateAdd, gate.Value),
+            GateKind.Multiply => string.Format(GateMultiply, gate.Value),
+            GateKind.Subtract => string.Format(GateSubtract, gate.Value),
+            GateKind.Merge => GateMerge,
+            GateKind.ChangeType => UnitPalette.Label(gate.UnitType),
+            _ => throw new ArgumentOutOfRangeException(nameof(gate)),
+        };
     }
 }

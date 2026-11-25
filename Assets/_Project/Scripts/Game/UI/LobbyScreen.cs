@@ -17,7 +17,7 @@ namespace TopWar.Game.UI
         private Text _startLabel;
         private (UpgradeType Type, Text Level, Text Effect, Button Buy, Text BuyLabel)[] _rows;
 
-        public void Init(PlayerProgress progress, Action<int> onStart)
+        public void Init(PlayerProgress progress, Action<int> onStart, Action<int> onStartRunner)
         {
             _progress = progress;
             var canvas = UiFactory.CreateCanvas(transform);
@@ -45,6 +45,11 @@ namespace TopWar.Game.UI
                 Vector2.one, Vector2.one, new Vector2(-400f, -108f), new Vector2(-200f, -36f),
                 () => _progress.AddGems(DebugGemsAmount));
             debugGems.GetComponentInChildren<Text>().fontSize = 32;
+
+            var debugRunner = UiFactory.CreateButton(root, "DebugRunner", Texts.DevRunner,
+                new Color(0.24f, 0.3f, 0.37f), Vector2.one, Vector2.one,
+                new Vector2(-620f, -108f), new Vector2(-420f, -36f), () => onStartRunner(_progress.NextStage));
+            debugRunner.GetComponentInChildren<Text>().fontSize = 32;
 
             var upgrades = UiFactory.CreateRect(root, "Upgrades", new Vector2(0.05f, 0.24f),
                 new Vector2(0.95f, 0.64f), Vector2.zero, Vector2.zero);

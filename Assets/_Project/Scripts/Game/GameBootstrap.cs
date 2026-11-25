@@ -2,9 +2,12 @@ using TopWar.Core.Battle;
 using TopWar.Core.Economy;
 using TopWar.Core.Grid;
 using TopWar.Core.Progression;
+using TopWar.Core.Runner;
+using TopWar.Core.Units;
 using TopWar.Game.Battle;
 using TopWar.Game.Config;
 using TopWar.Game.Controls;
+using TopWar.Game.Runner;
 using TopWar.Game.Save;
 using TopWar.Game.UI;
 using TopWar.Game.View;
@@ -42,7 +45,7 @@ namespace TopWar.Game
             _camera = GetOrCreateMainCamera();
 
             _lobby = new GameObject("Lobby").AddComponent<LobbyScreen>();
-            _lobby.Init(_progress, StartStage);
+            _lobby.Init(_progress, StartStage, StartRunner);
         }
 
         private void StartStage(int stage)
@@ -96,6 +99,31 @@ namespace TopWar.Game
                 Battle.GameOver -= OnGameOver;
                 Battle.StageCleared -= OnStageCleared;
             }
+        }
+
+        private void StartRunner(int stage)
+        {
+            if (_lobby == null) return;
+
+            _progress.Changed -= SaveProgress;
+            _lobby.gameObject.SetActive(false);
+            Destroy(_lobby.gameObject);
+            _lobby = null;
+
+            var config = balance != null ? balance : ScriptableObject.CreateInstance<BalanceConfig>();
+            var settings = new RunnerSettings
+            {
+                UnitBaseAttack = config.BaseAttack,
+                ArmyAttackMultiplier = _progress.GetAttackMultiplier(UnitType.Army),
+                AirForceAttackMultiplier = _progress.GetAttackMultiplier(UnitType.AirForce),
+                NavyAttackMultiplier = _progress.GetAttackMultiplier(UnitType.Navy),
+            };
+
+            var track = RunnerTrackGenerator.Create(stage, seed: stage);
+            var squad = new Squad(settings.StartType, settings.StartCount);
+            var simulation = new RunnerSimulation(squad, track, settings);
+            new GameObject("Runner").AddComponent<RunnerController>().Init(simulation, settings, _camera, victory =>
+                new GameObject("Result").AddComponent<ResultScreen>().Init(stage, victory, 0, 0, 0));
         }
 
         private void SaveProgress()
