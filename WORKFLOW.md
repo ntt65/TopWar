@@ -37,8 +37,7 @@ TopWar/
 │   └── design/                  ← 3단계: 시스템별 상세 설계서
 ├── README.md                    ← 게임 기획서
 ├── WORKFLOW.md                  ← 이 문서
-├── CLAUDE.md                    ← Claude 규칙
-└── chat_history.md              ← 작업 기록
+└── CLAUDE.md                    ← Claude 규칙
 ```
 
 ### 코드 구조 원칙
