@@ -1,5 +1,7 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.Events;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 namespace TopWar.Game.UI
@@ -7,6 +9,13 @@ namespace TopWar.Game.UI
     internal static class UiFactory
     {
         private static Font _font;
+
+        internal static void EnsureEventSystem()
+        {
+            if (EventSystem.current != null) return;
+            var go = new GameObject("EventSystem", typeof(EventSystem));
+            go.AddComponent<InputSystemUIInputModule>().AssignDefaultActions();
+        }
 
         internal static Canvas CreateCanvas(Transform parent)
         {
@@ -62,6 +71,10 @@ namespace TopWar.Game.UI
 
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
+            var colors = button.colors;
+            // 배경을 불투명하게 두고 어둡게만 해서 비활성일 때도 버튼 모양이 보이게 한다.
+            colors.disabledColor = new Color(0.65f, 0.65f, 0.65f, 1f);
+            button.colors = colors;
             button.onClick.AddListener(onClick);
 
             var text = CreateText(rect, "Label", 52, TextAnchor.MiddleCenter, Color.white,

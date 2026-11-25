@@ -1,4 +1,5 @@
 using TopWar.Core.Units;
+using TopWar.Game.UI;
 using UnityEngine;
 
 namespace TopWar.Game.View
@@ -33,9 +34,9 @@ namespace TopWar.Game.View
 
         public static string Label(UnitType type) => type switch
         {
-            UnitType.Army => "ARMY",
-            UnitType.AirForce => "AIR",
-            UnitType.Navy => "NAVY",
+            UnitType.Army => Texts.Army,
+            UnitType.AirForce => Texts.Air,
+            UnitType.Navy => Texts.Navy,
             _ => type.ToString(),
         };
     }

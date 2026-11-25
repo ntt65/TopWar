@@ -193,20 +193,37 @@ namespace TopWar.Core.Battle
             Assert.That(targets, Is.EqualTo(new[] { battle.Enemies[0], battle.Enemies[0] }));
         }
 
-        [Test]
-        public void AirForceAttack_AppliesSplashWithEachEnemysTypeMultiplier()
+        [TestCase(1f)]
+        [TestCase(2f)]
+        public void AirForceAttack_AppliesSplashWithEachEnemysTypeMultiplier(float attackMultiplier)
         {
             _settings.EnemyCountBase = 3;
             _settings.SpawnIntervalStart = 0f;
             _settings.SpawnIntervalMin = 0f;
+            _settings.AirForceAttackMultiplier = attackMultiplier;
             _grid.TryPlace(new GridPos(0, 0), new UnitData(UnitType.AirForce, 1));
             var battle = StartBattle((UnitType.Army, 0), (UnitType.Navy, 0), (UnitType.Navy, 1));
 
             battle.Tick(0f);
 
-            Assert.That(battle.Enemies[0].Hp, Is.EqualTo(30f - 4.5f * 0.85f).Within(0.0001f));
-            Assert.That(battle.Enemies[1].Hp, Is.EqualTo(45f - 4.5f * 1.25f).Within(0.0001f));
+            Assert.That(battle.Enemies[0].Hp, Is.EqualTo(30f - 4.5f * attackMultiplier * 0.85f).Within(0.0001f));
+            Assert.That(battle.Enemies[1].Hp, Is.EqualTo(45f - 4.5f * attackMultiplier * 1.25f).Within(0.0001f));
             Assert.That(battle.Enemies[2].Hp, Is.EqualTo(45f));
+        }
+
+        [TestCase(UnitType.Army, 20f)]
+        [TestCase(UnitType.AirForce, 4.5f)]
+        [TestCase(UnitType.Navy, 26f)]
+        public void Attack_AppliesArmyUpgradeOnlyToArmy(UnitType type, float expectedDamage)
+        {
+            _settings.ArmyAttackMultiplier = 2f;
+            _grid.TryPlace(new GridPos(0, 0), new UnitData(type, 1));
+            var battle = StartBattle((type, 0));
+
+            battle.Tick(0f);
+
+            var enemy = battle.Enemies[0];
+            Assert.That(enemy.Hp, Is.EqualTo(enemy.Stats.MaxHp - expectedDamage).Within(0.0001f));
         }
 
         [Test]
@@ -262,6 +279,72 @@ namespace TopWar.Core.Battle
             Assert.That(_wallet.Gold, Is.EqualTo(39));
             Assert.That(battle.State, Is.EqualTo(BattleState.Break));
             Assert.That(battle.BreakRemaining, Is.EqualTo(2f));
+        }
+
+        [Test]
+        public void WaveLimit_AwardsFinalBonusAndRaisesVictoryAfterWaveCleared()
+        {
+            _settings.WavesPerStage = 2;
+            _settings.UnitBaseAttack = 100f;
+            _grid.TryPlace(new GridPos(0, 0), new UnitData(UnitType.Army, 1));
+            var battle = StartBattle((UnitType.Army, 0), (UnitType.Army, 0));
+            var cleared = new List<int>();
+            int stageClears = 0;
+            battle.WaveCleared += (wave, _) =>
+            {
+                Assert.That(battle.State, Is.EqualTo(BattleState.InWave));
+                Assert.That(battle.ClearedWaves, Is.EqualTo(wave));
+                cleared.Add(wave);
+            };
+            battle.StageCleared += () =>
+            {
+                Assert.That(battle.State, Is.EqualTo(BattleState.Victory));
+                Assert.That(cleared, Is.EqualTo(new[] { 1, 2 }));
+                Assert.That(_wallet.Gold, Is.EqualTo(65));
+                stageClears++;
+            };
+
+            Assert.That(battle.ClearedWaves, Is.Zero);
+            battle.Tick(0f);
+            Assert.That(battle.State, Is.EqualTo(BattleState.Break));
+            Assert.That(battle.ClearedWaves, Is.EqualTo(1));
+            Assert.That(stageClears, Is.Zero);
+
+            battle.Tick(_settings.BreakDuration);
+            Assert.That(battle.WaveNumber, Is.EqualTo(2));
+            Assert.That(battle.ClearedWaves, Is.EqualTo(1));
+            battle.Tick(1f);
+            battle.Tick(100f);
+
+            Assert.That(battle.State, Is.EqualTo(BattleState.Victory));
+            Assert.That(battle.WaveNumber, Is.EqualTo(2));
+            Assert.That(battle.ClearedWaves, Is.EqualTo(2));
+            Assert.That(battle.BreakRemaining, Is.Zero);
+            Assert.That(battle.Enemies, Is.Empty);
+            Assert.That(_wallet.Gold, Is.EqualTo(65));
+            Assert.That(stageClears, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void DefaultWaveLimit_ContinuesBeyondTenClearedWaves()
+        {
+            _settings.EnemyCountBase = 0;
+            _settings.BossEvery = 100;
+            var battle = CreateBattle();
+            int stageClears = 0;
+            battle.StageCleared += () => stageClears++;
+
+            for (int wave = 1; wave <= 11; wave++)
+            {
+                battle.Tick(_settings.BreakDuration);
+                Assert.That(battle.WaveNumber, Is.EqualTo(wave));
+                battle.Tick(0f);
+
+                Assert.That(battle.ClearedWaves, Is.EqualTo(wave));
+                Assert.That(battle.State, Is.EqualTo(BattleState.Break));
+            }
+
+            Assert.That(stageClears, Is.Zero);
         }
 
         [Test]
@@ -344,6 +427,7 @@ namespace TopWar.Core.Battle
 
             Assert.That(battle.State, Is.EqualTo(BattleState.GameOver));
             Assert.That(battle.WaveNumber, Is.EqualTo(1));
+            Assert.That(battle.ClearedWaves, Is.Zero);
             Assert.That(_health.Current, Is.Zero);
             Assert.That(_wallet.Gold, Is.Zero);
             Assert.That(battle.Enemies, Is.Empty);

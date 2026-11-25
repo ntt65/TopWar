@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TopWar.Core.Battle;
 using TopWar.Core.Grid;
+using TopWar.Core.Units;
 using TopWar.Game.View;
 using UnityEngine;
 
@@ -64,7 +65,10 @@ namespace TopWar.Game.Battle
             if (!unit.HasValue) return;
 
             var from = _gridView.CellToWorld(pos) + Vector3.up * 0.5f;
-            ProjectileView.Fire(from, view, UnitPalette.Color(unit.Value.Type), transform);
+            var type = unit.Value.Type;
+            ProjectileView.Fire(from, view, UnitPalette.Color(type), transform);
+            var aboveTarget = view.AimPosition + Vector3.up * 0.6f;
+            DamageNumberView.Show(aboveTarget, damage, CounterTable.DamageMultiplier(type, target.Type), transform);
         }
     }
 }

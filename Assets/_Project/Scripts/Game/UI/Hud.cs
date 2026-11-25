@@ -2,15 +2,12 @@ using TopWar.Core.Economy;
 using TopWar.Core.Units;
 using TopWar.Game.View;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
 namespace TopWar.Game.UI
 {
     /// <summary>
-    /// 프로토타입 HUD. 코드로 uGUI를 만든다 (에디터 작업 없음).
-    /// 한글 폰트는 Phase 3에서 TextMeshPro로 교체하면서 넣는다.
+    /// 골드, 소환 비용과 병종별 소환 버튼을 표시한다.
     /// </summary>
     public sealed class Hud : MonoBehaviour
     {
@@ -29,7 +26,7 @@ namespace TopWar.Game.UI
         {
             _wallet = wallet;
             _summon = summon;
-            EnsureEventSystem();
+            UiFactory.EnsureEventSystem();
             var canvas = UiFactory.CreateCanvas(transform);
             BuildLayout(canvas.transform);
 
@@ -58,10 +55,10 @@ namespace TopWar.Game.UI
             switch (result)
             {
                 case SummonResult.NotEnoughGold:
-                    ShowMessage("Not enough gold");
+                    ShowMessage(Texts.NotEnoughGold);
                     break;
                 case SummonResult.GridFull:
-                    ShowMessage("Grid is full");
+                    ShowMessage(Texts.GridFull);
                     break;
             }
 
@@ -70,8 +67,8 @@ namespace TopWar.Game.UI
 
         private void Refresh()
         {
-            _goldText.text = $"Gold  {_wallet.Gold}";
-            _costText.text = $"Summon cost  {_summon.CurrentCost}";
+            _goldText.text = string.Format(Texts.Gold, _wallet.Gold);
+            _costText.text = string.Format(Texts.SummonCost, _summon.CurrentCost);
         }
 
         private void ShowMessage(string message)
@@ -82,19 +79,13 @@ namespace TopWar.Game.UI
 
         // ---------- UI 생성 ----------
 
-        private static void EnsureEventSystem()
-        {
-            if (EventSystem.current != null) return;
-            var go = new GameObject("EventSystem", typeof(EventSystem));
-            go.AddComponent<InputSystemUIInputModule>().AssignDefaultActions();
-        }
-
         private void BuildLayout(Transform root)
         {
             _goldText = UiFactory.CreateText(root, "Gold", 56, TextAnchor.MiddleLeft, Color.white,
                 new Vector2(0f, 1f), new Vector2(0.65f, 1f), new Vector2(48f, -150f), new Vector2(0f, -40f));
 
-            UiFactory.CreateButton(root, "DebugGold", $"+{DebugGoldAmount}G", new Color(0.3f, 0.3f, 0.3f, 0.9f),
+            UiFactory.CreateButton(root, "DebugGold", string.Format(Texts.DebugGold, DebugGoldAmount),
+                new Color(0.3f, 0.3f, 0.3f, 0.9f),
                 new Vector2(0.7f, 1f), new Vector2(1f, 1f), new Vector2(0f, -150f), new Vector2(-40f, -50f),
                 () => _wallet.Add(DebugGoldAmount));
 
@@ -110,7 +101,15 @@ namespace TopWar.Game.UI
                 var type = types[i];
                 var minX = i / (float)types.Length;
                 var maxX = (i + 1) / (float)types.Length;
-                UiFactory.CreateButton(root, $"Summon{type}", UnitPalette.Label(type), UnitPalette.Color(type),
+                var label = UnitPalette.Label(type);
+                foreach (var opponent in types)
+                {
+                    if (!CounterTable.Beats(type, opponent)) continue;
+                    var hint = string.Format(Texts.StrongVs, UnitPalette.Label(opponent));
+                    label += $"\n<size=32>{hint}</size>";
+                    break;
+                }
+                UiFactory.CreateButton(root, $"Summon{type}", label, UnitPalette.Color(type),
                     new Vector2(minX, 0f), new Vector2(maxX, 0f), new Vector2(24f, 50f), new Vector2(-24f, 240f),
                     () => Summon(type));
             }
