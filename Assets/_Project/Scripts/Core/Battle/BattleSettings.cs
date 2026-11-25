@@ -24,6 +24,19 @@ namespace TopWar.Core.Battle
         public int BossReward { get; set; } = 50;
         public float BossTimeLimit { get; set; } = 60f;
         public float BossBaseDamagePercent { get; set; } = 0.5f;
+        public int WavesPerStage { get; set; }
+        public float EnemyHpScale { get; set; } = 1f;
+        public float ArmyAttackMultiplier { get; set; } = 1f;
+        public float AirForceAttackMultiplier { get; set; } = 1f;
+        public float NavyAttackMultiplier { get; set; } = 1f;
+
+        public float GetUnitAttackMultiplier(UnitType type) => type switch
+        {
+            UnitType.Army => ArmyAttackMultiplier,
+            UnitType.AirForce => AirForceAttackMultiplier,
+            UnitType.Navy => NavyAttackMultiplier,
+            _ => throw new ArgumentOutOfRangeException(nameof(type)),
+        };
 
         public EnemyStats GetEnemyBaseStats(UnitType type) => type switch
         {

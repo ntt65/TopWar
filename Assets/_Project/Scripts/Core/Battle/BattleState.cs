@@ -5,5 +5,6 @@ namespace TopWar.Core.Battle
         Break,
         InWave,
         GameOver,
+        Victory,
     }
 }

@@ -25,7 +25,7 @@ namespace TopWar.Core.Battle
             int normalCount = _settings.EnemyCountBase + _settings.EnemyCountPerWave * waveIndex;
             float interval = Math.Max(_settings.SpawnIntervalMin,
                 _settings.SpawnIntervalStart - _settings.SpawnIntervalStep * waveIndex);
-            float hpMultiplier = (float)Math.Pow(_settings.EnemyHpGrowth, waveIndex);
+            float hpMultiplier = (float)Math.Pow(_settings.EnemyHpGrowth, waveIndex) * _settings.EnemyHpScale;
             bool isBossWave = waveNumber % _settings.BossEvery == 0;
             if (isBossWave) normalCount /= 2;
 

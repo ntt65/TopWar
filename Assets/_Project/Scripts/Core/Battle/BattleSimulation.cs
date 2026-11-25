@@ -44,6 +44,7 @@ namespace TopWar.Core.Battle
 
         public BattleState State { get; private set; }
         public int WaveNumber { get; private set; }
+        public int ClearedWaves { get; private set; }
         public bool IsBossWave => _wave != null && _wave.IsBoss;
         public float BreakRemaining => State == BattleState.Break ? _breakRemaining : 0f;
         public float? BossTimeRemaining => _boss != null && _boss.IsAlive ? _bossTimeRemaining : (float?)null;
@@ -52,6 +53,7 @@ namespace TopWar.Core.Battle
 
         public event Action<int> WaveStarted;
         public event Action<int, int> WaveCleared;
+        public event Action StageCleared;
         public event Action<Enemy> EnemySpawned;
         public event Action<Enemy> EnemyKilled;
         public event Action<Enemy> EnemyReachedBase;
@@ -65,7 +67,7 @@ namespace TopWar.Core.Battle
                 throw new ArgumentOutOfRangeException(nameof(deltaTime));
 
             // 이벤트에서 Tick을 호출해도 진행 중인 처리 순서와 재사용 목록을 유지한다.
-            if (State == BattleState.GameOver || _isTicking) return;
+            if (State == BattleState.GameOver || State == BattleState.Victory || _isTicking) return;
 
             _isTicking = true;
             try
@@ -115,7 +117,15 @@ namespace TopWar.Core.Battle
         {
             int bonus = _settings.WaveClearBonusBase + _settings.WaveClearBonusPerWave * WaveNumber;
             _wallet.Add(bonus);
+            ClearedWaves++;
             WaveCleared?.Invoke(WaveNumber, bonus);
+            if (_settings.WavesPerStage > 0 && WaveNumber >= _settings.WavesPerStage)
+            {
+                State = BattleState.Victory;
+                StageCleared?.Invoke();
+                return;
+            }
+
             State = BattleState.Break;
             _breakRemaining = _settings.BreakDuration;
         }
@@ -237,7 +247,8 @@ namespace TopWar.Core.Battle
         private void Fire(GridPos pos, UnitData unit, CombatProfile profile, Enemy target)
         {
             _resolvedEnemies.Clear();
-            float attackPower = profile.AttackPower(_settings.UnitBaseAttack, unit.Level);
+            float baseAttack = _settings.UnitBaseAttack * _settings.GetUnitAttackMultiplier(unit.Type);
+            float attackPower = profile.AttackPower(baseAttack, unit.Level);
             float damage = attackPower * CounterTable.DamageMultiplier(unit.Type, target.Type);
             int targetLane = target.Lane;
             float targetY = target.Y;
