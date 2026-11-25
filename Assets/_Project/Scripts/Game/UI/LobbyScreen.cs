@@ -112,6 +112,7 @@ namespace TopWar.Game.UI
                     ? Texts.Max
                     : string.Format(Texts.UpgradeCost, _progress.GetCost(row.Type));
                 row.Buy.interactable = _progress.CanUpgrade(row.Type);
+                row.BuyLabel.color = row.Buy.interactable ? Color.white : new Color(0.65f, 0.65f, 0.65f);
             }
         }
 

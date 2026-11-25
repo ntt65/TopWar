@@ -7,6 +7,7 @@ namespace TopWar.Game.UI
         public const string Navy = "NAVY";
         public const string Gold = "Gold {0}";
         public const string SummonCost = "Summon cost {0}";
+        public const string StrongVs = "Strong vs {0}";
         public const string DebugGold = "+{0}G";
         public const string NotEnoughGold = "Not enough gold";
         public const string GridFull = "Grid is full";

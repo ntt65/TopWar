@@ -101,7 +101,15 @@ namespace TopWar.Game.UI
                 var type = types[i];
                 var minX = i / (float)types.Length;
                 var maxX = (i + 1) / (float)types.Length;
-                UiFactory.CreateButton(root, $"Summon{type}", UnitPalette.Label(type), UnitPalette.Color(type),
+                var label = UnitPalette.Label(type);
+                foreach (var opponent in types)
+                {
+                    if (!CounterTable.Beats(type, opponent)) continue;
+                    var hint = string.Format(Texts.StrongVs, UnitPalette.Label(opponent));
+                    label += $"\n<size=32>{hint}</size>";
+                    break;
+                }
+                UiFactory.CreateButton(root, $"Summon{type}", label, UnitPalette.Color(type),
                     new Vector2(minX, 0f), new Vector2(maxX, 0f), new Vector2(24f, 50f), new Vector2(-24f, 240f),
                     () => Summon(type));
             }

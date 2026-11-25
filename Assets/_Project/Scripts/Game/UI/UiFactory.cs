@@ -71,6 +71,9 @@ namespace TopWar.Game.UI
 
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
+            var colors = button.colors;
+            colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.35f);
+            button.colors = colors;
             button.onClick.AddListener(onClick);
 
             var text = CreateText(rect, "Label", 52, TextAnchor.MiddleCenter, Color.white,
