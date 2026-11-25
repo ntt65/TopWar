@@ -35,7 +35,7 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         if: steps.ready.outputs.run == 'true'
         with:
           path: Library
