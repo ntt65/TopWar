@@ -4,6 +4,25 @@
 
 ---
 
+## 2026-11-25 — #3 Phase 1 프로토타입, Codex 협업 체계
+
+- **Chat ID:** 640346c0-dcd0-4262-bc6a-86e241f914d6
+- **커밋:** `feature/3-grid-merge` 브랜치 (PR → `develop`, Closes #3)
+- **요약:** Unity 6.3 LTS 프로젝트를 저장소 루트에 합쳤다(빈 폴더에 Universal 3D 템플릿으로 만든 뒤 `Assets` 일부·`Packages`·`ProjectSettings`·`Library`를 이동). Phase 1(그리드, 병종별 소환, 드래그 이동·스왑·합성, 쿼터뷰 카메라, HUD)을 구현하고 에디터 Simulator에서 동작을 확인했다. 작업 방식을 WORKFLOW.md로 모으고, Codex용 AGENTS.md와 작업 지시서 양식을 만들었다.
+- **결정 사항:**
+  - Unity 6.3 LTS (6000.3.29f1). Android 모듈 설치됨. 코드 에디터는 VS Code.
+  - 문서 역할: README = 기획, WORKFLOW.md = 작업 방식, AGENTS.md = Codex 규칙, CLAUDE.md = Claude 규칙.
+  - 역할: Claude는 설계·지시서(`docs/tasks/`)·리뷰, Codex는 구현·테스트·push, 사용자는 에디터 작업·PR·머지.
+  - 코드 구조: `Core`(순수 C#, 규칙) / `Game`(MonoBehaviour, 표시·입력·UI). 씬에는 `GameBootstrap` 하나만 붙이고 나머지는 코드로 생성.
+  - 카메라: 그리드 폭을 화면 가로에 맞추고 그리드 아래 끝을 화면 20% 높이(버튼 위)에 고정. 위쪽 공간은 적 레인.
+  - HUD는 프로토타입이라 영어 표기. 한글 폰트는 Phase 3에서 TextMeshPro로.
+- **미결정/다음 할 일:**
+  - Phase 1 PR 머지 후 #4 Phase 2 지시서 작성 → Codex 구현
+  - GitHub 기본 브랜치 `develop`으로 변경, Unity 라이선스 시크릿 등록
+  - `D:\git\TopWarUnity` 잔여 폴더 삭제
+
+---
+
 ## 2026-11-25 — 기술 스택을 Unity 3D로 전환
 
 - **Chat ID:** 640346c0-dcd0-4262-bc6a-86e241f914d6

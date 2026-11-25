@@ -173,8 +173,9 @@ namespace TopWar.Game.UI
             button.targetGraphic = image;
             button.onClick.AddListener(onClick);
 
-            CreateText(rect, "Label", 52, TextAnchor.MiddleCenter, Color.white,
+            var text = CreateText(rect, "Label", 52, TextAnchor.MiddleCenter, Color.white,
                 Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
+            text.text = label;
         }
     }
 }
