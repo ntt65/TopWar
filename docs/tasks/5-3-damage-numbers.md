@@ -3,7 +3,7 @@
 - **이슈:** #5
 - **브랜치:** `feature/5-economy-progression`
 - **작성:** Claude / 2026-11-26
-- **순서:** Phase 3 지시서 3개 중 3번째. **5-2가 끝난 뒤** 진행한다. medium으로 충분.
+- **순서:** Phase 3 지시서 3개 중 3번째. **5-2가 끝난 뒤** 진행한다 (`Texts` 사용). medium으로 충분.
 
 ## 목표
 
@@ -24,7 +24,7 @@
 
 `public static void Show(Vector3 worldPosition, float damage, float counterMultiplier, Transform parent)`
 
-- `TextMesh`로 표시 (기존 `UnitView` 레벨 라벨과 같은 방식). 폰트는 `UiFactory`가 쓰는 한글 폰트와 같은 것을 쓴다 (숫자만 나오므로 대체 폰트여도 무방).
+- `TextMesh`로 표시 (기존 `UnitView` 레벨 라벨과 같은 방식, 내장 `LegacyRuntime.ttf`).
 - 문구: 피해를 반올림한 정수.
 - 색과 크기:
   - 유리 (`counterMultiplier > 1`): 노란색, 1.3배 크기
@@ -41,8 +41,8 @@
 
 ### 3. 소환 버튼 상성 힌트
 
-- 각 소환 버튼 라벨을 두 줄로: 첫 줄 병종 이름(기존 크기), 둘째 줄 작은 글씨(크기 32)로 `{이긴 상대}에 강함`.
-  - 육군 → `공군에 강함`, 공군 → `해군에 강함`, 해군 → `육군에 강함`.
+- 각 소환 버튼 라벨을 두 줄로: 첫 줄 병종 이름(기존 크기), 둘째 줄 작은 글씨(크기 32)로 `Strong vs {이긴 상대}`.
+  - ARMY → `Strong vs AIR`, AIR → `Strong vs NAVY`, NAVY → `Strong vs ARMY`.
 - 이긴 상대는 `CounterTable.Beats`로 계산한다 (하드코딩 금지).
 
 ## 하지 말 것
@@ -54,7 +54,7 @@
 
 - [ ] 유닛이 쏠 때 적 머리 위에 숫자가 떠올랐다 사라짐
 - [ ] 상성 유리 노란색·크게, 불리 회색·작게
-- [ ] 소환 버튼 아래 줄에 `○○에 강함`
+- [ ] 소환 버튼 아래 줄에 `Strong vs ...`
 - [ ] EditMode 테스트 전부 통과
 
 ## 참고
