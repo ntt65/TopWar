@@ -9,6 +9,15 @@
 /[Mm]emory[Cc]aptures/
 /[Rr]ecordings/
 .utmp/
+sysinfo.txt
+
+# Addressables / Burst build output
+/[Aa]ssets/[Ss]treamingAssets/aa/
+/[Aa]ssets/[Ss]treamingAssets/aa.meta
+*_BurstDebugInformation_DoNotShip/
+
+# Rider plugin generated into Assets
+/[Aa]ssets/Plugins/Editor/JetBrains*
 
 # Asset meta data should only be ignored when the corresponding asset is also ignored
 !/[Aa]ssets/**/*.meta
