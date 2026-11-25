@@ -20,6 +20,7 @@
 - 작업이 끝나면 Claude는 커밋 → push까지만 한다.
 - **PR 생성과 머지는 사용자가 직접 한다.** Claude는 PR을 만들거나 머지하지 않는다.
 - push 후 PR을 만들 때가 되면 사용자에게 알린다: PR 생성 링크, base 브랜치(`develop` 또는 릴리스면 `main`), PR 제목·본문 초안.
+- 작업은 GitHub 이슈 단위로 한다. 브랜치 이름에 이슈 번호를 넣고(예: `feature/4-grid-merge`), PR 본문 초안에는 반드시 `Closes #<이슈 번호>`를 넣는다.
 - 머지 후 다음 작업은 최신 `develop`을 pull한 뒤 새 브랜치에서 시작한다.
 
 ## CI / DevOps
