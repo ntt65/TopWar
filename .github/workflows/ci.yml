@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      # Flutter 프로젝트(pubspec.yaml)가 생기기 전까지는 검사를 건너뛴다.
+      - name: Check for Flutter project
+        id: project
+        run: |
+          if [ -f pubspec.yaml ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::pubspec.yaml not found - skipping Flutter checks."
+          fi
+
+      - uses: subosito/flutter-action@v2
+        if: steps.project.outputs.exists == 'true'
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        if: steps.project.outputs.exists == 'true'
+        run: flutter pub get
+
+      - name: Check formatting
+        if: steps.project.outputs.exists == 'true'
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        if: steps.project.outputs.exists == 'true'
+        run: flutter analyze
+
+      - name: Test
+        if: steps.project.outputs.exists == 'true' && hashFiles('test/**/*.dart') != ''
+        run: flutter test
