@@ -4,6 +4,22 @@
 
 ---
 
+## 2026-11-26 — #4 Phase 2 설계·리뷰 (Claude)
+
+- **Chat ID:** 640346c0-dcd0-4262-bc6a-86e241f914d6
+- **커밋:** `f7266ad`(지시서), `f13fd17`·`825b7b7`(AGENTS.md 규칙), `be22230` — `feature/4-wave-combat` (PR → `develop`, Closes #4)
+- **요약:** Phase 2를 지시서 3개(4-1 데이터, 4-2 시뮬레이션, 4-3 화면)로 나눠 Codex에게 맡기고 각각 리뷰했다. 세 개 모두 수정 없이 통과. 에디터에서 웨이브 14까지 플레이, 게임 오버·Restart, EditMode 테스트 81개 통과를 확인했다.
+- **결정 사항:**
+  - Codex 모델: 로직이 얽힌 지시서(4-2)는 high, 나머지는 medium.
+  - Codex는 시작할 때 Unity가 만든 `.meta`를 먼저 커밋하고, chat_history에는 `[Codex]` 태그로 자기 항목만 쓰고 반드시 커밋한다 (AGENTS.md).
+  - 지시서는 클래스·메서드 시그니처와 수치까지 정해서 쓰면 Codex가 질문 없이 한 번에 구현한다.
+- **미결정/다음 할 일:**
+  - Phase 3에서: 골드 사용처(영구 업그레이드), 한글 폰트(TextMeshPro)
+  - Phase 4에서: 적 체력 바 위치, `grid.Units()` 매 프레임 할당 제거, 밸런스
+  - GitHub 기본 브랜치 `develop` 변경, Unity 라이선스 시크릿 등록
+
+---
+
 ## 2026-11-26 00:00 — [Codex] #4 Phase 2.1~2.3 전투 Core와 화면 연결
 
 - **Chat ID:** 01a2132a-06cb-7440-9cc8-7dfc052bda5d
