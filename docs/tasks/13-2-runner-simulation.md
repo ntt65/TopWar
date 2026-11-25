@@ -21,6 +21,7 @@
 - 트랙은 앞으로 뻗은 직선. **`Distance`**(시작 0에서 앞으로 증가)와 **`X`**(좌우, `-HalfWidth`~`+HalfWidth`)만 쓴다.
 - 게이트는 좌·우 두 칸: `X < 0`이면 왼쪽, `X >= 0`이면 오른쪽.
 - 적 무리와 보스는 트랙 폭 전체를 막는다 (좌우로 피할 수 없음).
+- 보급 상자는 왼쪽 또는 오른쪽 절반에만 놓인다. 무리가 **같은 쪽에 있을 때만** 그 상자를 쏜다. 게이트를 고를 쪽과 상자를 쏠 쪽이 갈리면서 선택이 생긴다.
 
 ## 변경할 파일
 
@@ -29,6 +30,7 @@
 | `Core/Runner/RunnerSettings.cs` | 추가 | 수치 설정 |
 | `Core/Runner/GateRow.cs` | 추가 | 게이트 한 줄 (좌·우) |
 | `Core/Runner/EnemyGroup.cs` | 추가 | 길 중간 적 무리 (런타임 체력 포함) |
+| `Core/Runner/SupplyCrate.cs` | 추가 | 쏴서 부수면 아군이 합류하는 보급 상자 |
 | `Core/Runner/RunnerBoss.cs` | 추가 | 끝 보스 (런타임 체력 포함) |
 | `Core/Runner/RunnerTrack.cs` | 추가 | 게이트·적·보스 배치 |
 | `Core/Runner/RunnerTrackGenerator.cs` | 추가 | stage·seed로 트랙 생성 |
@@ -85,6 +87,21 @@ public sealed class EnemyGroup
     internal void Clear();                      // Hp = 0 (충돌 처리용)
 }
 
+public sealed class SupplyCrate
+{
+    public SupplyCrate(float distance, bool isLeft, float maxHp, int rewardCount); // maxHp <= 0, rewardCount < 1 → 예외
+    public float Distance { get; }
+    public bool IsLeft { get; }
+    public float MaxHp { get; }
+    public float Hp { get; }
+    public int RewardCount { get; }             // 부수면 합류하는 Lv.1 유닛 수
+    public bool IsOpen { get; }                 // 부서짐
+    public bool IsMissed { get; }               // 부수지 못하고 지나침
+    public bool IsActive => !IsOpen && !IsMissed;
+    internal void TakeDamage(float damage);     // 0이 되면 IsOpen = true
+    internal void Miss();
+}
+
 public sealed class RunnerBoss
 {
     public RunnerBoss(float distance, UnitType type, float maxHp, int killsPerAttack); // 잘못된 값 → 예외
@@ -99,10 +116,12 @@ public sealed class RunnerBoss
 
 public sealed class RunnerTrack
 {
-    public RunnerTrack(IReadOnlyList<GateRow> gates, IReadOnlyList<EnemyGroup> enemies, RunnerBoss boss);
-    // null → 예외. gates·enemies는 Distance 오름차순으로 정렬해 보관한다.
+    public RunnerTrack(IReadOnlyList<GateRow> gates, IReadOnlyList<EnemyGroup> enemies,
+        IReadOnlyList<SupplyCrate> crates, RunnerBoss boss);
+    // null → 예외. gates·enemies·crates는 Distance 오름차순으로 정렬해 보관한다.
     public IReadOnlyList<GateRow> Gates { get; }
     public IReadOnlyList<EnemyGroup> Enemies { get; }
+    public IReadOnlyList<SupplyCrate> Crates { get; }
     public RunnerBoss Boss { get; }
     public float Length => Boss.Distance;
 }
@@ -129,6 +148,7 @@ public sealed class RunnerTrack
   - `Add(random 3~10)`, `Multiply(random 2~3)`, `Subtract(random 2~6)`, `Merge()`, `ChangeType(random 병종)`
 - **적 무리 #i:** 병종 랜덤, `count = 10 + 10 × i`, `hpPerEnemy = 10 × scale`.
 - **보스:** 병종 랜덤, `maxHp = 2000 × scale`, `killsPerAttack = 3`.
+- **보급 상자 #i:** 거리 `30, 50, 70, 90, 110, 130, 150` (7개). 좌우 랜덤, `maxHp = 20 × (i + 1) × scale`, `rewardCount = random 2~5 + i`.
 
 ### 4. `RunnerState` (enum)
 
@@ -154,6 +174,9 @@ public event Action<GateRow, Gate, bool> GatePassed;        // 줄, 적용된 �
 public event Action<EnemyGroup, float> EnemyGroupHit;       // 대상, 피해
 public event Action<EnemyGroup> EnemyGroupDestroyed;        // 사격으로 체력 0
 public event Action<EnemyGroup, int> EnemyGroupCollided;    // 닿음, 잃은 아군 수
+public event Action<SupplyCrate, float> CrateHit;           // 대상, 피해
+public event Action<SupplyCrate> CrateOpened;               // 부서짐, 아군 합류 후 호출
+public event Action<SupplyCrate> CrateMissed;               // 부수지 못하고 지나침
 public event Action BossFightStarted;
 public event Action<float> BossHit;                         // 피해
 public event Action<int> BossAttacked;                      // 잃은 아군 수
@@ -164,17 +187,22 @@ public event Action<bool> Finished;                         // 승리면 true. �
 
 1. `Distance += ForwardSpeed × dt`. 단 `Track.Length - BossStopGap`을 넘지 않는다.
 2. **게이트:** `Passed`가 아니고 `Distance >= row.Distance`인 줄마다 (거리순) `X`로 좌·우를 골라 `ApplyTo(Squad)`, `Passed = true`, `GatePassed`.
-3. **충돌:** 살아 있고 `Distance >= group.Distance`인 적 무리마다 `lost = Min(RemainingCount, Squad.Count)`, `lost > 0`이면 `Squad.Remove(lost)`, `group.Clear()`, `EnemyGroupCollided(group, lost)`.
-4. **사격:** 아래 "사격" 규칙.
-5. 거리가 `Track.Length - BossStopGap`에 도달했으면 `State = BossFight`, `BossFightStarted`.
-6. `Squad.IsDefeated`면 패배 처리.
+3. **상자 지나침:** `IsActive`이고 `Distance >= crate.Distance`인 상자는 `Miss()`, `CrateMissed`. (상자는 피해를 주지 않는다.)
+4. **충돌:** 살아 있고 `Distance >= group.Distance`인 적 무리마다 `lost = Min(RemainingCount, Squad.Count)`, `lost > 0`이면 `Squad.Remove(lost)`, `group.Clear()`, `EnemyGroupCollided(group, lost)`.
+5. **사격:** 아래 "사격" 규칙.
+6. 거리가 `Track.Length - BossStopGap`에 도달했으면 `State = BossFight`, `BossFightStarted`.
+7. `Squad.IsDefeated`면 패배 처리.
 
 **사격 (Running·BossFight 공통):**
 
 - 사격 타이머를 `dt`만큼 진행하고, `FireInterval`이 찰 때마다 1회 사격 (큰 dt면 여러 번).
-- 대상: Running이면 `0 < group.Distance - Distance <= FireRange`인 살아 있는 적 무리 중 가장 가까운 것. BossFight면 보스. 대상이 없으면 그 사격은 버린다 (타이머만 소모).
-- 피해 = `Squad.Firepower(UnitBaseAttack, GetUnitAttackMultiplier(Squad.Type)) × FireInterval × CounterTable.DamageMultiplier(Squad.Type, 대상.Type)`. (Firepower는 초당 피해로 본다.)
+- 대상 (Running): 사거리 안(`0 < 대상.Distance - Distance <= FireRange`)의 아래 후보 중 **가장 가까운 것**. 거리가 같으면 적 무리 우선.
+  - 살아 있는 적 무리
+  - `IsActive`이고 무리와 같은 쪽(`IsLeft == (X < 0)`)인 보급 상자
+- 대상 (BossFight): 보스. 대상이 없으면 그 사격은 버린다 (타이머만 소모).
+- 기본 피해 = `Squad.Firepower(UnitBaseAttack, GetUnitAttackMultiplier(Squad.Type)) × FireInterval`. (Firepower는 초당 피해로 본다.) 적 무리·보스에는 `CounterTable.DamageMultiplier(Squad.Type, 대상.Type)`를 곱한다. 상자에는 상성이 없다.
 - 적 무리: `TakeDamage` → `EnemyGroupHit` → 체력 0이면 `EnemyGroupDestroyed`.
+- 상자: `TakeDamage` → `CrateHit` → 부서졌으면 `Squad.Add(RewardCount)` 후 `CrateOpened`.
 - 보스: `TakeDamage` → `BossHit` → 체력 0이면 승리 처리.
 
 **BossFight:**
@@ -196,12 +224,14 @@ public event Action<bool> Finished;                         // 승리면 true. �
 - 큰 dt 한 번에 게이트 두 줄을 넘으면 거리순으로 둘 다 적용
 - 사격: 사거리 밖이면 피해 없음, 사거리 안이면 피해 = 공식대로 (상성 유리 1.25배 확인), `EnemyGroupDestroyed`
 - `RemainingCount`가 체력에 따라 올림으로 줄어듦
+- 상자: 같은 쪽이면 쏘고 반대쪽이면 안 쏨. 부서지면 `Squad.Count`가 `RewardCount`만큼 증가, `CrateOpened`. 상성 미적용 확인. 부수지 못하고 지나가면 `CrateMissed`, 아군 변화 없음
+- 대상 선택: 사거리 안에 적 무리와 같은 쪽 상자가 있으면 더 가까운 쪽을 쏨
 - 충돌: 남은 적 수만큼 아군 감소, 아군이 더 적으면 전멸 → `Defeat`, `Finished(false)` 1회
 - 보스전 진입 위치(`Length - BossStopGap`)와 `BossFightStarted`, 이후 전진 없음
 - 보스 처치 → `Victory`, `Finished(true)`, 이후 Tick 무시
 - 보스 시간 초과 → `Defeat`
 - 보스 공격 간격마다 `KillsPerAttack`만큼 감소
-- 생성기: 같은 stage·seed → 같은 트랙(게이트 종류·값, 적 병종·수, 보스), 배치 거리 표, 한 줄의 두 게이트 종류가 다름, stage가 오르면 적·보스 체력 증가, stage 0 예외
+- 생성기: 같은 stage·seed → 같은 트랙(게이트 종류·값, 적 병종·수, 상자 위치·보상, 보스), 배치 거리 표, 한 줄의 두 게이트 종류가 다름, stage가 오르면 적·보스 체력 증가, stage 0 예외
 
 ## 하지 말 것
 
