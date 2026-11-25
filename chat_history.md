@@ -16,9 +16,13 @@
   - 브랜치 전략: `develop` 기본 개발, 작업마다 `feature/*` 브랜치 → push. PR 생성과 머지는 사용자가 직접 하고, Claude는 때가 되면 알린다. `main`은 릴리스용.
   - 검증은 사용자와 GitHub Actions가 맡는다. 코드 디버깅은 최대 3회, CLI·CI·승인 실패는 재시도 없이 보고한다.
   - DevOps 구성: `develop` 브랜치 생성, CI(format/analyze/test), Dependabot, PR 템플릿, Flutter용 .gitignore(기존 Unity 템플릿 교체), .gitattributes(LF).
+  - 작업은 GitHub 이슈 단위로 한다. 브랜치에 이슈 번호를 넣고 PR에 `Closes #번호`를 쓴다.
 - **미결정/다음 할 일:**
   - GitHub에서 `develop`·`main` 브랜치 보호 규칙 설정 (CI 통과 필수, 직접 push 금지)
-  - README 하단의 잘못 복사된 내용 정리
-  - 설계 공백 결정: 그리드↔레인 관계, 적 병종 유무와 적의 공격 대상, 해군 배치(물 타일?), 합성 최대 레벨·소환 비용·병종 선택 방식, 기지 확장·연구 시스템 명세
-  - 실제 게임명 "Top War" 언급 정리 (출시 시 고유한 이름 권장)
-  - Phase 1: 5×5 그리드 + 드래그 앤 드롭 합성 프로토타입
+  - 등록된 이슈 (진행 순서):
+    - #1 docs: README 정리
+    - #2 design: 게임 설계 공백 결정
+    - #3 feat: Phase 1 - 그리드 및 드래그 앤 드롭 합성 프로토타입
+    - #4 feat: Phase 2 - 적 웨이브, 이동 경로, 자동 전투
+    - #5 feat: Phase 3 - 병종 상성, 골드 경제, HUD
+    - #6 feat: Phase 4 - 이펙트, 사운드, 밸런싱
